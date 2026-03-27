@@ -92,7 +92,7 @@ function syncModeUi() {
   if (geminiPanel) geminiPanel.hidden = mode !== "gemini";
   if (compositePanel) compositePanel.hidden = mode !== "composite";
   if (modelSelect && mode === "gemini") {
-    modelSelect.value = "gemini-3-pro-image-preview";
+    modelSelect.value = "gemini-2.5-flash-image";
   }
 }
 
