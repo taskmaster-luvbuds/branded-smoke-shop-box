@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Display branding</title>
+    <link rel="stylesheet" href="/styles.css?v=9" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="head">
+        <h1>Brand your display</h1>
+        <p class="lede">
+          Pick a <strong>shelf-band color</strong> (middle strips), add your logo.
+          <strong>AI blend (Gemini / Nano Banana Pro)</strong> matches logo lighting to that display photo.
+          <strong>Exact composite</strong> draws on fixed layout regions; use <strong>green/cyan guides</strong> and optional
+          <strong>OCR</strong> (red boxes) to see where text already sits so you can nudge placement.
+        </p>
+      </header>
+
+      <form id="form" class="card">
+        <fieldset class="mode-field">
+          <legend class="mode-legend">How to apply branding</legend>
+          <label class="radio-row">
+            <input type="radio" name="mode" value="composite" checked />
+            <span>Exact composite — layout + optional OCR guides; perspective warp on header; no AI</span>
+          </label>
+          <label class="radio-row">
+            <input type="radio" name="mode" value="gemini" />
+            <span>AI blend — Gemini Nano Banana Pro (recommended for natural logo blend on colored display)</span>
+          </label>
+        </fieldset>
+
+        <fieldset class="color-field">
+          <legend class="mode-legend">Shelf color (middle bands)</legend>
+          <input type="hidden" name="displayColor" id="displayColor" value="red" />
+          <div class="color-grid" id="color-grid" aria-label="Choose display color variant"></div>
+        </fieldset>
+
+        <div class="field default-display">
+          <span>Display (default)</span>
+          <div class="default-display-row">
+            <div class="preview-stack">
+              <img
+                class="default-display-thumb"
+                id="display-thumb"
+                src="/colors/red.jpg"
+                width="200"
+                height="200"
+                alt="Selected display preview"
+              />
+              <canvas id="guide-canvas" class="guide-canvas" width="1" height="1" aria-hidden="true"></canvas>
+            </div>
+            <label class="field override-file">
+              <span>Override with another image (optional)</span>
+              <input type="file" name="display" accept="image/png,image/jpeg,image/webp" />
+            </label>
+          </div>
+          <div class="guide-controls">
+            <label class="inline-check">
+              <input type="checkbox" id="show-layout-guides" checked />
+              <span>Placement regions</span>
+            </label>
+            <label class="inline-check">
+              <input type="checkbox" id="show-ocr-guides" />
+              <span>OCR text boxes</span>
+            </label>
+            <button type="button" class="btn btn-secondary" id="scan-ocr">
+              Scan display for text (OCR)
+            </button>
+          </div>
+          <p id="guide-status" class="guide-status muted" hidden></p>
+          <p id="calibration-badge" class="calibration-badge muted" aria-live="polite"></p>
+          <p class="hint hint-tight">
+            <strong>Safe zones:</strong> header = centered inset on white board; middle two = red front lips; base = kickplate.
+            The line above shows which calibration is active. Cyan = header warp.
+          </p>
+        </div>
+
+        <label class="field">
+          <span>Logo image</span>
+          <input type="file" name="logos" accept="image/png,image/jpeg,image/webp" multiple />
+        </label>
+        <p class="hint">Composite mode uses the <strong>first</strong> selected file. For AI mode you can add more files in a future update.</p>
+
+        <div id="composite-only" class="composite-panel">
+          <label class="field">
+            <span>Placement region</span>
+            <select name="region" id="region">
+              <option value="headerPerspective" selected>
+                Header backboard (perspective warp)
+              </option>
+              <option value="header">Header backboard (flat)</option>
+              <option value="topShelf">Top colored band — print strip (flat)</option>
+              <option value="middleShelf">Middle colored band — print strip (flat)</option>
+              <option value="bottom">Base front panel (flat)</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Size (<span id="scale-val">100</span>% of fit)</span>
+            <input type="range" name="scale" id="scale" min="0.3" max="1.8" step="0.05" value="1" />
+          </label>
+          <label class="field">
+            <span>Horizontal nudge</span>
+            <input type="range" name="offX" id="offX" min="-0.2" max="0.2" step="0.01" value="0" />
+          </label>
+          <label class="field">
+            <span>Vertical nudge</span>
+            <input type="range" name="offY" id="offY" min="-0.2" max="0.2" step="0.01" value="0" />
+          </label>
+        </div>
+        <p class="hint">
+          Perspective quads are preset for the <strong>bundled PNG</strong> and for the <strong>color JPEG</strong> set.
+          Custom uploads pick the closer preset by aspect ratio; nudge sliders if the shot differs.
+        </p>
+
+        <div id="gemini-only" class="gemini-panel" hidden>
+          <label class="field">
+            <span>Extra direction (optional)</span>
+            <textarea
+              name="prompt"
+              rows="3"
+              placeholder="e.g. Integrate logos into header signage only."
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Model</span>
+            <select name="model" id="model">
+              <option value="gemini-3-pro-image-preview" selected>
+                Nano Banana Pro — gemini-3-pro-image-preview (default, closest to web quality)
+              </option>
+              <option value="gemini-3.1-flash-image-preview">
+                Nano Banana 2 — gemini-3.1-flash-image-preview
+              </option>
+              <option value="gemini-2.5-flash-image">Nano Banana — gemini-2.5-flash-image</option>
+            </select>
+          </label>
+          <p class="hint model-hint">
+            AI output can be inconsistent. Prefer <strong>Exact composite</strong> for logos you must not distort.
+            <a href="https://ai.google.dev/gemini-api/docs/rate-limits" rel="noopener">Rate limits</a>
+          </p>
+        </div>
+
+        <button type="submit" id="submit" class="btn">Build branded image</button>
+      </form>
+
+      <section id="status" class="status" hidden></section>
+
+      <section class="out">
+        <h2>Result</h2>
+        <div id="result-actions" class="result-actions" hidden>
+          <button type="button" id="download-btn" class="btn btn-download">
+            Download image
+          </button>
+        </div>
+        <div id="result-empty" class="muted">No image yet.</div>
+        <img id="result-img" alt="Result" hidden />
+      </section>
+    </main>
+    <script type="module" src="/app.js?v=14"></script>
+  </body>
+</html>

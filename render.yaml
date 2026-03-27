@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: luvbuds
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_IMAGE_MODEL
+        value: gemini-3-pro-image-preview
+      - key: GEMINI_IMAGE_SIZE
+        value: "2K"
